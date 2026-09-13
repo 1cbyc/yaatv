@@ -206,8 +206,16 @@ yaatv --scry
 
 ## License
 
-yaatv is MIT licensed. Release ZIPs include `LICENSE`,
-`THIRD_PARTY_LICENSES.txt`, and `FFMPEG_BUILD_INFO.txt`.
+yaatv is MIT licensed. Standalone release ZIPs include `LICENSE`,
+`THIRD_PARTY_LICENSES.txt` (generated for bundled binary dependencies), and
+`FFMPEG_BUILD_INFO.txt`.
+
+### Third-party dependencies
+
+| Package | License | Purpose | Source |
+|---|---|---|---|
+| [`mutagen`](https://github.com/quodlibet/mutagen) | GPL-2.0-or-later | Audio metadata and tag reading | [PyPI](https://pypi.org/project/mutagen/) |
+| [`Pillow`](https://github.com/python-pillow/Pillow) | MIT-CMU / HPND | Cover art dimensions and validation | [PyPI](https://pypi.org/project/pillow/) |
 
 ## Development
 
@@ -239,9 +247,9 @@ workflows, and guidelines.
 
 - Look through [good first issues](https://github.com/yaatv/yaatv/labels/good%20first%20issue)
   to get started.
-- Leave a comment to claim an issue before starting work to avoid duplicate PRs.
+- Leave a comment on an issue before starting work to coordinate and avoid duplicate PRs.
 - Report bugs or suggest features on the [issue tracker](https://github.com/yaatv/yaatv/issues).
-- See [CONTRIBUTORS.md](CONTRIBUTORS.md) for recognition of everyone who has helped
+- See [CONTRIBUTORS](CONTRIBUTORS) for recognition of everyone who has helped
   build and test yaatv.
 - Read our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before participating.
 
@@ -251,7 +259,7 @@ Tagging a version that starts with `v` builds the Windows, Linux, macOS x64,
 and macOS arm64 assets, then attaches them to a GitHub release.
 
 ```sh
-git tag v0.6.3
+git tag v0.6.4
 git push origin main --tags
 ```
 

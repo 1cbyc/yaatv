@@ -4,14 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "yaatv"
-version = "0.6.3"
+version = "0.6.4"
 description = "Yet Another Audio To Video: combine audio and cover art into a YouTube-ready video."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = [
   "LICENSE",
-  "THIRD_PARTY_LICENSES.txt"
 ]
 authors = [
   { name = "cavyion" }
