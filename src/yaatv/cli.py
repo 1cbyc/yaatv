@@ -7,6 +7,7 @@ import math
 import os
 import platform
 import re
+import shlex
 import shutil
 import subprocess  # nosec B404
 import sys
@@ -1655,7 +1656,10 @@ def resolve_output_path(
 
 
 def quote_command(command: Sequence[str]) -> str:
-    return subprocess.list2cmdline([str(part) for part in command])
+    parts = [str(part) for part in command]
+    if os.name == "nt":
+        return subprocess.list2cmdline(parts)
+    return shlex.join(parts)
 
 
 def run_ffmpeg(command: Sequence[str], *, verbose: bool = False) -> int:
