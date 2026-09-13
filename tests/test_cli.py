@@ -264,9 +264,6 @@ def test_audio_and_image_are_required_for_encoding(
         run(["--audio", str(audio_path), "--dry-run"], stdin=StringIO(), stderr=StringIO())
 
     with pytest.raises(YaatvError, match="Cover image is required"):
-        run(["--audio", str(audio_path), "--bg-color", "black", "--dry-run"], stdin=StringIO(), stderr=StringIO())
-
-    with pytest.raises(YaatvError, match="Cover image is required"):
         run(["--audio", str(audio_path), "--bg-blur", "--dry-run"], stdin=StringIO(), stderr=StringIO())
 
     with pytest.raises(SystemExit):
@@ -2030,10 +2027,16 @@ def test_run_uses_output_dir_and_overwrite_flag(
 
 
 @pytest.mark.parametrize("no_warn", [False, True])
+@pytest.mark.parametrize(
+    ("background", "normalized_background"),
+    [("white", "0xffffff"), ("black", "black"), ("#000000", "0x000000")],
+)
 def test_run_dry_run_allows_color_only_output(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
     no_warn: bool,
+    background: str,
+    normalized_background: str,
 ) -> None:
     audio_path = tmp_path / "track.flac"
     output_path = tmp_path / "out.mp4"
@@ -2058,13 +2061,13 @@ def test_run_dry_run_allows_color_only_output(
 
     monkeypatch.setattr("yaatv.cli.run_ffmpeg", encode)
 
-    args = ["-a", str(audio_path), "--bg-color", "white", "-o", str(output_path), "--dry-run"]
+    args = ["-a", str(audio_path), "--bg-color", background, "-o", str(output_path), "--dry-run"]
     if no_warn:
         args.append("--no-warn")
 
     assert run(args, stdin=StringIO(), stderr=stderr) == 0
     output = stderr.getvalue()
-    assert "color=c=0xffffff:s=1920x1080:d=12.1" in output
+    assert f"color=c={normalized_background}:s=1920x1080:d=12.1" in output
     assert str(output_path) in output
     assert ("warning: source audio bitrate is 192kbps" in output) is not no_warn
     assert not output_path.exists()
