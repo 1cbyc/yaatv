@@ -2507,6 +2507,42 @@ def test_extract_embedded_cover_uses_apic_tag(
     assert validate_image(cover_path) == (16, 16)
 
 
+def test_extract_embedded_cover_skips_invalid_candidate(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    invalid_picture = type("FakePicture", (), {"data": b"not an image", "mime": "image/jpeg"})()
+    valid_picture = type("FakePicture", (), {"data": _image_bytes(), "mime": "image/jpeg"})()
+    audio = type("FakeAudio", (), {"pictures": [invalid_picture, valid_picture], "tags": None})()
+    audio_path = tmp_path / "track.flac"
+    output_dir = tmp_path / "covers"
+    output_dir.mkdir()
+    monkeypatch.setattr("yaatv.cli.MutagenFile", lambda _path: audio)
+
+    cover_path = extract_embedded_cover(audio_path, output_dir)
+
+    assert cover_path == output_dir / "embedded-cover-2.jpg"
+    assert validate_image(cover_path) == (16, 16)
+    assert not (output_dir / "embedded-cover-1.jpg").exists()
+
+
+def test_extract_embedded_cover_rejects_all_invalid_candidates(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    invalid_picture = type("FakePicture", (), {"data": b"not an image", "mime": "image/jpeg"})()
+    audio = type("FakeAudio", (), {"pictures": [invalid_picture], "tags": None})()
+    audio_path = tmp_path / "track.flac"
+    output_dir = tmp_path / "covers"
+    output_dir.mkdir()
+    monkeypatch.setattr("yaatv.cli.MutagenFile", lambda _path: audio)
+
+    with pytest.raises(YaatvError, match=f"Could not read embedded cover art: {re.escape(str(audio_path))}"):
+        extract_embedded_cover(audio_path, output_dir)
+
+    assert not (output_dir / "embedded-cover-1.jpg").exists()
+
+
 def test_animated_image_is_rejected(tmp_path: Path) -> None:
     image_path = tmp_path / "cover.gif"
     frames = [

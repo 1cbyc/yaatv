@@ -1033,6 +1033,7 @@ def extract_embedded_cover(audio_path: Path, directory: Path) -> Path | None:
     if audio is None:
         return None
 
+    last_validation_error: YaatvError | None = None
     for index, (image_data, mime_type) in enumerate(_embedded_cover_candidates(audio), start=1):
         suffix = _embedded_cover_suffix(mime_type, image_data)
         cover_path = directory / f"embedded-cover-{index}{suffix}"
@@ -1040,9 +1041,13 @@ def extract_embedded_cover(audio_path: Path, directory: Path) -> Path | None:
         try:
             validate_image(cover_path, "Embedded cover art")
         except YaatvError as exc:
-            raise YaatvError(f"Could not read embedded cover art: {audio_path}") from exc
+            cover_path.unlink(missing_ok=True)
+            last_validation_error = exc
+            continue
         return cover_path
 
+    if last_validation_error is not None:
+        raise YaatvError(f"Could not read embedded cover art: {audio_path}") from last_validation_error
     return None
 
 
