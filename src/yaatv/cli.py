@@ -197,10 +197,6 @@ def background_color(value: str) -> str:
     raise argparse.ArgumentTypeError(f"--bg-color must be a valid #RRGGBB hex color or named CSS color: {value}")
 
 
-def is_default_background_color(value: str) -> bool:
-    return value == DEFAULT_BACKGROUND_COLOR or value == "0x000000"
-
-
 def format_seconds(seconds: float) -> str:
     seconds = float(seconds)
     return str(int(seconds)) if seconds.is_integer() else f"{seconds:g}"
@@ -1947,7 +1943,6 @@ def run(
             and args.bg_image is None
             and not args.bg_blur
             and args.bg_color_explicit
-            and not is_default_background_color(args.bg_color)
         )
 
         audio_path = require_file(args.audio, "Audio file")
