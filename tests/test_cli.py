@@ -61,6 +61,7 @@ from yaatv.cli import (
     parse_args,
     probe_output,
     quality_warnings,
+    quote_command,
     read_audio_metadata,
     resolve_ffmpeg_tools,
     resolve_output_path,
@@ -1418,6 +1419,28 @@ def test_run_dry_run_prints_command_without_encoding(
     assert "ffmpeg" in stderr.getvalue()
     assert str(output_path) in stderr.getvalue()
     assert not output_path.exists()
+
+
+def test_quote_command_uses_posix_quoting(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("yaatv.cli.os.name", "posix")
+
+    assert quote_command(["ffmpeg", "audio files/track's.flac", "a&b", "plain"]) == (
+        "ffmpeg 'audio files/track'\"'\"'s.flac' 'a&b' plain"
+    )
+
+
+def test_quote_command_preserves_windows_quoting(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured: list[list[str]] = []
+
+    def list2cmdline(command: list[str]) -> str:
+        captured.append(command)
+        return "windows command"
+
+    monkeypatch.setattr("yaatv.cli.os.name", "nt")
+    monkeypatch.setattr("yaatv.cli.subprocess.list2cmdline", list2cmdline)
+
+    assert quote_command(["ffmpeg", "audio files/track.flac"]) == "windows command"
+    assert captured == [["ffmpeg", "audio files/track.flac"]]
 
 
 def test_run_dry_run_does_not_require_overwrite_when_output_exists(
